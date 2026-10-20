@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>知行家教 · 演示版</title>
+<style>
+  :root{
+    --primary:#4f46e5; --primary2:#7c3aed; --bg:#f6f7fb; --card:#fff;
+    --text:#1f2430; --muted:#6b7280; --line:#e7e9f0; --ok:#16a34a; --warn:#d97706;
+    --bad:#dc2626; --chip:#eef0fb; --shadow:0 6px 24px rgba(40,40,90,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+  /* nav */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:18px;height:60px}
+  .logo{font-weight:800;font-size:20px;background:linear-gradient(90deg,var(--primary),var(--primary2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+  .badge-demo{font-size:11px;background:var(--chip);color:var(--primary);padding:2px 8px;border-radius:999px;font-weight:700}
+  .nav-links{display:flex;gap:6px;flex:1;overflow-x:auto;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{padding:7px 12px;border-radius:10px;color:var(--muted);font-size:14px;white-space:nowrap}
+  .nav-links a.active,.nav-links a:hover{background:var(--chip);color:var(--primary);font-weight:600}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;
+    padding:9px 16px;border-radius:10px;font-weight:600;font-size:14px;background:var(--primary);color:#fff;
+    transition:.15s}
+  .btn:hover{filter:brightness(1.05)}
+  .btn.ghost{background:#fff;color:var(--primary);border:1px solid var(--line)}
+  .btn.sm{padding:6px 12px;font-size:13px}
+  .btn.warn{background:var(--warn)} .btn.ok{background:var(--ok)} .btn.bad{background:var(--bad)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  /* hero */
+  .hero{padding:54px 0 30px;text-align:center;
+    background:radial-gradient(1200px 400px at 50% -10%,#ecebff 0%,transparent 70%)}
+  .hero h1{font-size:38px;margin:0 0 12px;font-weight:850;letter-spacing:-1px}
+  .hero p{color:var(--muted);font-size:17px;margin:0 auto 22px;max-width:640px}
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+  .role-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;cursor:pointer;
+    box-shadow:var(--shadow);transition:.18s;text-align:left}
+  .role-card:hover{transform:translateY(-4px);border-color:var(--primary)}
+  .role-card .ic{font-size:30px}
+  .role-card h3{margin:10px 0 6px;font-size:18px}
+  .role-card p{color:var(--muted);font-size:13px;margin:0}
+  /* cards/grid */
+  .section{margin:26px 0}
+  .section h2{font-size:22px;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+  .tc{display:flex;gap:12px;align-items:flex-start}
+  .avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary2));
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex:none}
+  .tc .name{font-weight:700;font-size:16px}
+  .tc .sub{color:var(--muted);font-size:13px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .tag{font-size:12px;background:var(--chip);color:var(--primary);padding:3px 9px;border-radius:8px}
+  .tag.g{background:#e7f8ee;color:var(--ok)} .tag.o{background:#fff4e0;color:var(--warn)}
+  .tag.bad{background:#fdeaea;color:var(--bad)}
+  .price{font-weight:800;color:var(--primary);font-size:15px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px}
+  .dot.on{background:var(--ok)} .dot.busy{background:var(--warn)} .dot.off{background:#cbd5e1}
+  /* filter */
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:12px;color:var(--muted);font-weight:600}
+  select,input,textarea{padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;
+    font-family:inherit;background:#fff;color:var(--text)}
+  textarea{resize:vertical;min-height:70px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .muted{color:var(--muted)} .small{font-size:13px} .center{text-align:center}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:var(--chip);color:var(--primary);
+    padding:5px 12px;border-radius:999px;font-size:13px;font-weight:600}
+  hr{border:none;border-top:1px solid var(--line);margin:18px 0}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(20,22,40,.45);display:flex;align-items:center;justify-content:center;
+    z-index:100;padding:16px}
+  .modal{background:#fff;border-radius:18px;width:min(520px,100%);max-height:90vh;overflow:auto;padding:24px;box-shadow:var(--shadow)}
+  .modal h3{margin:0 0 16px;font-size:20px}
+  .role-pick{display:flex;gap:8px;margin-bottom:14px}
+  .role-pick button{flex:1;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font-weight:600}
+  .role-pick button.sel{border-color:var(--primary);background:var(--chip);color:var(--primary)}
+  /* toast */
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2430;color:#fff;
+    padding:11px 18px;border-radius:12px;font-size:14px;z-index:200;opacity:0;transition:.25s;pointer-events:none}
+  #toast.show{opacity:1}
+  .stepper{display:flex;gap:0;margin:10px 0 18px}
+  .stepper .st{flex:1;text-align:center;font-size:12px;color:var(--muted);position:relative}
+  .stepper .st.active{color:var(--primary);font-weight:700}
+  .stepper .st::before{content:"";display:block;height:3px;background:var(--line);margin-bottom:6px}
+  .stepper .st.active::before{background:var(--primary)}
+  .kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .kv:last-child{border:none}
+  .note{background:#fff8ec;border:1px solid #f3e0b5;color:#8a6d1a;padding:10px 14px;border-radius:10px;font-size:13px;margin:12px 0}
+  .note.blue{background:#eef2ff;border-color:#c7d2fe;color:#3b3fae}
+  .note b{color:inherit}
+  .empty{text-align:center;color:var(--muted);padding:40px 0}
+  .footer{padding:30px 0;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:30px}
+  .flex-between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .click{cursor:pointer}
+  @media(max-width:640px){.roles{grid-template-columns:1fr}.hero h1{font-size:28px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a href="#/home" class="logo">知行家教 <span class="badge-demo">演示版</span></a>
+    <nav class="nav-links" id="navLinks"></nav>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<div id="modalRoot"></div>
+<div id="toast"></div>
+<div class="footer">知行家教 · 课程设计演示项目 ｜ 本演示版所有数据存储于你的浏览器本地，不会上传服务器，也不与其他用户共享（符合作业演示场景）<br>
+  真实支付 / 短信验证码 / 第三方学历·实名核验 / 真实 AI 推理 等需付费与备案的能力，已在对应页面标注「演示·未开通」，未作伪造。</div>
+
+<script>
+/* ============================================================
+   知行家教 演示版 —— 纯前端，数据存 localStorage（刷新不丢）
+   ============================================================ */
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+};
+const K = {
+  accounts:'jj_accounts', teachers:'jj_teachers', students:'jj_students', parents:'jj_parents',
+  needs:'jj_needs', invitations:'jj_invitations', orders:'jj_orders', reports:'jj_reports',
+  messages:'jj_messages', membership:'jj_membership', favorites:'jj_favorites',
+  session:'jj_session', seeded:'jj_seeded'
+};
+const uid = (p)=> p + Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+const now = ()=> Date.now();
+const fmtTime = (t)=>{ const d=new Date(t); const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+const esc = (s)=> String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const COMMON_SUBJECTS = ['语文','数学','英语','物理','化学','生物','历史','地理','政治','计算机'];
+const GRADE_LEVELS = ['小学','初中','高中','大学'];
+const REGIONS = ['北京','上海','广州','深圳','杭州','成都','武汉','西安','南京','其他'];
+const EDUCATIONS = ['本科在读','本科','硕士在读','硕士','博士在读','博士'];
+const MODES = [['online','线上'],['offline','线下'],['both','均可']];
+const RATE = 0.08; // 接单服务费比例（演示）
+
+/* ---------------- 种子数据 ---------------- */
+function seed(){
+  if(LS.get(K.seeded)) return;
+  const t = now();
+  const teachers = [
+    {id:'t_lin', accountId:'sys', name:'林同学', school:'北京师范大学', education:'硕士在读',
+      subjects:['数学','物理'], grades:['高中','初中'], region:'北京', price:180, mode:'both',
+      rating:4.9, experience:'3年', bio:'北师大教育学硕士，擅长高考数学与物理提分，带过20+学生。',
+      eduHistory:[{school:'北京师范大学',degree:'硕士',major:'学科教学(数学)'},{school:'山东大学',degree:'本科',major:'数学'}],
+      cert:{cell:true,realName:true,studentStatus:true,education:true,platform:true},
+      presence:'online', lastActive:t, status:'approved'},
+    {id:'t_chen', accountId:'sys', name:'陈学姐', school:'复旦大学', education:'本科',
+      subjects:['英语','语文'], grades:['高中','初中'], region:'上海', price:150, mode:'online',
+      rating:4.8, experience:'2年', bio:'复旦英语系，雅思7.5，专注阅读与写作。',
+      eduHistory:[{school:'复旦大学',degree:'本科',major:'英语'},{school:'上海中学',degree:'高中',major:''}],
+      cert:{cell:true,realName:true,studentStatus:true,education:true,platform:false},
+      presence:'busy', lastActive:t, status:'approved'},
+    {id:'t_wang', accountId:'sys', name:'王学长', school:'浙江大学', education:'博士在读',
+      subjects:['物理','化学'], grades:['高中'], region:'杭州', price:220, mode:'both',
+      rating:5.0, experience:'4年', bio:'浙大物理博士，竞赛辅导经验丰富。',
+      eduHistory:[{school:'浙江大学',degree:'博士',major:'物理'},{school:'南京大学',degree:'硕士',major:'物理'}],
+      cert:{cell:true,realName:true,studentStatus:true,education:true,platform:true},
+      presence:'offline', lastActive:t-1000*60*60*5, status:'approved'},
+    {id:'t_zhao', accountId:'sys', name:'赵老师', school:'华中师范大学', education:'本科',
+      subjects:['数学','计算机'], grades:['初中','小学','高中'], region:'武汉', price:120, mode:'offline',
+      rating:4.7, experience:'5年', bio:'师范科班出身，耐心细致，基础薄弱学生首选。',
+      eduHistory:[{school:'华中师范大学',degree:'本科',major:'数学'}],
+      cert:{cell:true,realName:true,studentStatus:true,education:true,platform:false},
+      presence:'online', lastActive:t, status:'approved'},
+    {id:'t_li', accountId:'sys', name:'李老师', school:'中山大学', education:'硕士',
+      subjects:['化学','生物'], grades:['高中'], region:'广州', price:200, mode:'both',
+      rating:4.9, experience:'3年', bio:'中大化学硕士，实验与理论结合教学。',
+      eduHistory:[{school:'中山大学',degree:'硕士',major:'化学'}],
+      cert:{cell:true,realName:true,studentStatus:true,education:true,platform:true},
+      presence:'online', lastActive:t, status:'approved'},
+    {id:'t_sun', accountId:'sys', name:'孙同学', school:'西安交通大学', education:'本科在读',
+      subjects:['数学','物理','计算机'], grades:['高中','初中'], region:'西安', price:100, mode:'online',
+      rating:4.6, experience:'1年', bio:'工科在读，性价比高，讲解通俗。',
+      eduHistory:[{school:'西安交通大学',degree:'本科',major:'计算机'}],
+      cert:{cell:true,realName:true,studentStatus:true,education:false,platform:false},
+      presence:'offline', lastActive:t-1000*60*40, status:'approved'}
+  ];
+  const needs = [
+    {id:'n1', by:'张家长', subject:'数学', grade:'高中', region:'北京', budget:200,
+      desc:'孩子高三数学基础弱，想找稳定辅导，每周2次。', status:'open', createdAt:t-1000*60*60*20},
+    {id:'n2', by:'李同学', subject:'英语', grade:'初中', region:'上海', budget:150,
+      desc:'中考英语冲刺，需要口语和写作专项。', status:'open', createdAt:t-1000*60*60*8}
+  ];
+  LS.set(K.teachers, teachers);
+  LS.set(K.needs, needs);
+  LS.set(K.accounts, []); LS.set(K.students, []); LS.set(K.parents, []);
+  LS.set(K.invitations, []); LS.set(K.orders, []); LS.set(K.reports, []);
+  LS.set(K.messages, []); LS.set(K.membership, null); LS.set(K.favorites, []);
+  LS.set(K.seeded, true);
+}
+seed();
+
+/* ---------------- 当前用户 ---------------- */
+let session = LS.get(K.session, null); // accountId
+function curAccount(){ return LS.get(K.accounts,[]).find(a=>a.id===session) || null; }
+function myTeacher(){ const a=curAccount(); if(!a) return null;
+  return LS.get(K.teachers,[]).find(t=>t.accountId===a.id) || null; }
+function isRole(r){ const a=curAccount(); return a && a.roles.includes(r); }
+
+/* ---------------- toast / modal ---------------- */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+function modal(html){ document.getElementById('modalRoot').innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; }
+
+/* ---------------- 在线状态派生 ---------------- */
+function onlineState(t){
+  if(t.presence==='offline') return 'offline';
+  if(now()-t.lastActive > 90000) return 'offline'; // 90s 无心跳转离线
+  return t.presence; // online / busy
+}
+function stateLabel(s){ return s==='online'?'在线':s==='busy'?'忙碌':'离线'; }
+function stateClass(s){ return s==='online'?'on':s==='busy'?'busy':'off'; }
+
+/* ---------------- 心跳 ---------------- */
+setInterval(()=>{ const a=curAccount(); const t=myTeacher();
+  if(a && t && t.presence!=='offline'){ t.lastActive=now(); const all=LS.get(K.teachers,[]);
+    const i=all.findIndex(x=>x.id===t.id); if(i>=0){all[i]=t; LS.set(K.teachers,all);} } }, 25000);
+
+/* ---------------- 导航 ---------------- */
+function renderNav(){
+  const a=curAccount();
+  const links=[
+    ['#/home','首页'],['#/find','找老师'],['#/qa','在线答疑'],['#/needs','需求广场'],
+    ['#/report','学情报告'],['#/messages','消息']
+  ];
+  if(a && a.roles.includes('admin')) links.push(['#/admin','管理后台']);
+  document.getElementById('navLinks').innerHTML = links.map(([h,t])=>
+    `<a href="${h}" data-h="${h}">${t}</a>`).join('');
+  const right=document.getElementById('navRight');
+  if(a){
+    right.innerHTML=`<span class="pill">${esc(a.name)}</span>
+      <a href="#/me" class="btn ghost sm">个人中心</a>
+      <button class="btn ghost sm" onclick="doLogout()">退出</button>`;
+  } else {
+    right.innerHTML=`<button class="btn ghost sm" onclick="openLogin(false)">登录</button>
+      <button class="btn sm" onclick="openLogin(true)">注册</button>`;
+  }
+  // active
+  const h=location.hash||'#/home';
+  document.querySelectorAll('#navLinks a').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('data-h')===h); });
+}
+
+/* ---------------- 路由 ---------------- */
+function render(){
+  const hash=location.hash||'#/home';
+  const parts=hash.slice(2).split('/'); // ['home'] or ['teacher','t1']
+  const app=document.getElementById('app');
+  renderNav();
+  switch(parts[0]){
+    case '': case 'home': app.innerHTML=viewHome(); break;
+    case 'find': app.innerHTML=viewFind(); bindFind(); break;
+    case 'teacher': app.innerHTML=viewTeacher(parts[1]); break;
+    case 'qa': app.innerHTML=viewQa(); bindQa(); break;
+    case 'needs': app.innerHTML=viewNeeds(); bindNeeds(); break;
+    case 'report': app.innerHTML=viewReport(); bindReport(); break;
+    case 'messages': app.innerHTML=viewMessages(); bindMessages(); break;
+    case 'member': app.innerHTML=viewMember(); bindMember(); break;
+    case 'me': app.innerHTML=viewMe(); bindMe(); break;
+    case 'admin': app.innerHTML=viewAdmin(); bindAdmin(); break;
+    default: app.innerHTML=viewHome();
+  }
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', render);
+window.addEventListener('DOMContentLoaded', render);
+
+/* ============================================================
+   各视图
+   ============================================================ */
+function viewHome(){
+  return `
+  <section class="hero">
+    <h1>找到靠谱的大学生家教</h1>
+    <p>分项实名 / 学籍 / 学历 / 平台资格核验，公开透明。本页为课程设计演示，所有数据存于本地浏览器。</p>
+    <div class="row" style="justify-content:center">
+      <button class="btn" onclick="openLogin(true)">免费注册</button>
+      <a href="#/find" class="btn ghost">立即找老师</a>
+    </div>
+    <div class="roles">
+      <div class="role-card" onclick="goto('#/find')"><div class="ic">🎓</div><h3>我是学生</h3>
+        <p>按科目、年级、区域筛选已核验教师，查看教育经历与认证，一键发起邀约。</p></div>
+      <div class="role-card" onclick="goto('#/needs')"><div class="ic">👪</div><h3>我是家长</h3>
+        <p>发布辅导需求，管理孩子档案，收到教师接单后实时查看订单与学情报告。</p></div>
+      <div class="role-card" onclick="openLogin(true)"><div class="ic">📚</div><h3>我是教师</h3>
+        <p>提交资料与分项认证，经平台审核上线，设置在线状态接单答疑。</p></div>
+    </div>
+  </section>
+  <section class="section wrap">
+    <h2>平台已核验教师（示例数据）</h2>
+    <div class="grid">${teacherCards(LS.get(K.teachers,[]).filter(t=>t.status==='approved').slice(0,4))}</div>
+    <div class="center" style="margin-top:14px"><a href="#/find" class="btn ghost">查看全部教师 →</a></div>
+  </section>`;
+}
+
+function certTags(c){
+  const map=[['cell','手机认证'],['realName','实名'],['studentStatus','学籍'],['education','学历'],['platform','平台资格']];
+  return map.map(([k,label])=> c&&c[k]?`<span class="tag g">✓ ${label}</span>`:`<span class="tag bad">✗ ${label}</span>`).join('');
+}
+function teacherCards(list){
+  if(!list.length) return `<div class="empty">暂无符合条件的教师</div>`;
+  const favs=LS.get(K.favorites,[]);
+  return list.map(t=>{
+    const s=onlineState(t);
+    return `<div class="card click" onclick="goto('#/teacher/${t.id}')">
+      <div class="tc">
+        <div class="avatar">${esc(t.name[0])}</div>
+        <div style="flex:1">
+          <div class="name">${esc(t.name)} ${t.education?`<span class="muted small">· ${esc(t.education)}</span>`:''}</div>
+          <div class="sub"><span class="dot ${stateClass(s)}"></span>${stateLabel(s)} · ${esc(t.school||'')} · ⭐${t.rating}</div>
+        </div>
+        <button class="btn ghost sm" onclick="event.stopPropagation();toggleFav('${t.id}')">${favs.includes(t.id)?'★已收藏':'☆收藏'}</button>
+      </div>
+      <div class="tags">${(t.subjects||[]).map(s=>`<span class="tag">${esc(s)}</span>`).join('')}
+        ${(t.grades||[]).map(g=>`<span class="tag">${esc(g)}</span>`).join('')}</div>
+      <div class="row" style="justify-content:space-between;margin-top:10px">
+        <div class="tags">${certTags(t.cert)}</div>
+        <div class="price">¥${t.price}/课时</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function teacherCardsForFind(){ return teacherCards(state._filtered||[]); }
+
+/* ---------------- 找老师 ---------------- */
+let state={};
+function viewFind(){
+  state={ filters:{}, _filtered:[] };
+  return `<section class="section">
+    <h2>🔍 找老师</h2>
+    <div class="filters">
+      <div class="field"><label>科目</label><select id="f_subject" onchange="applyFilter()">
+        <option value="">不限</option>${COMMON_SUBJECTS.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>年级</label><select id="f_grade" onchange="applyFilter()">
+        <option value="">不限</option>${GRADE_LEVELS.map(g=>`<option>${g}</option>`).join('')}</select></div>
+      <div class="field"><label>区域</label><select id="f_region" onchange="applyFilter()">
+        <option value="">不限</option>${REGIONS.map(r=>`<option>${r}</option>`).join('')}</select></div>
+      <div class="field"><label>在线状态</label><select id="f_online" onchange="applyFilter()">
+        <option value="">不限</option><option value="online">仅在线</option><option value="busy">在线/忙碌</option></select></div>
+      <div class="field"><label>学历</label><select id="f_edu" onchange="applyFilter()">
+        <option value="">不限</option>${EDUCATIONS.map(e=>`<option>${e}</option>`).join('')}</select></div>
+      <div class="field"><label>授课方式</label><select id="f_mode" onchange="applyFilter()">
+        <option value="">不限</option>${MODES.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
+      <div class="field"><label>最低价格</label><input id="f_pmin" type="number" placeholder="0" oninput="applyFilter()"></div>
+      <div class="field"><label>最高价格</label><input id="f_pmax" type="number" placeholder="9999" oninput="applyFilter()"></div>
+      <div class="field"><label>全部认证</label><select id="f_cert" onchange="applyFilter()">
+        <option value="">不限</option><option value="all">已全认证</option></select></div>
+      <div class="field"><label>排序</label><select id="f_sort" onchange="applyFilter()">
+        <option value="online">在线优先</option><option value="priceAsc">价格低→高</option>
+        <option value="priceDesc">价格高→低</option><option value="rating">评分高→低</option></select></div>
+    </div>
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn ghost sm" onclick="clearFilter()">清空筛选</button>
+      <span class="muted small" id="f_count"></span>
+    </div>
+    <div class="grid" id="findGrid"></div>
+  </section>`;
+}
+function applyFilter(){
+  const g=id=>document.getElementById(id)?.value||'';
+  const f={ subject:g('f_subject'), grade:g('f_grade'), region:g('f_region'), online:g('f_online'),
+    edu:g('f_edu'), mode:g('f_mode'), pmin:g('f_pmin'), pmax:g('f_pmax'), cert:g('f_cert'), sort:g('f_sort') };
+  state.filters=f;
+  let list=LS.get(K.teachers,[]).filter(t=>t.status==='approved');
+  if(f.subject) list=list.filter(t=>(t.subjects||[]).includes(f.subject));
+  if(f.grade) list=list.filter(t=>(t.grades||[]).includes(f.grade));
+  if(f.region) list=list.filter(t=>t.region===f.region);
+  if(f.online) list=list.filter(t=>{const s=onlineState(t); return f.online==='online'?s==='online':(s==='online'||s==='busy');});
+  if(f.edu) list=list.filter(t=>t.education===f.edu);
+  if(f.mode){ if(f.mode==='both') list=list.filter(t=>t.mode==='both'); else list=list.filter(t=>t.mode===f.mode||t.mode==='both'); }
+  if(f.pmin) list=list.filter(t=>t.price>=+f.pmin);
+  if(f.pmax) list=list.filter(t=>t.price<=+f.pmax);
+  if(f.cert==='all') list=list.filter(t=>t.cert&&t.cert.cell&&t.cert.realName&&t.cert.studentStatus&&t.cert.education&&t.cert.platform);
+  const so=f.sort;
+  list.sort((a,b)=>{
+    if(so==='priceAsc') return a.price-b.price;
+    if(so==='priceDesc') return b.price-a.price;
+    if(so==='rating') return b.rating-a.rating;
+    // online first
+    const sa=onlineState(a)==='offline'?1:0, sb=onlineState(b)==='offline'?1:0;
+    if(sa!==sb) return sa-sb; return b.rating-a.rating;
+  });
+  state._filtered=list;
+  const grid=document.getElementById('findGrid'); if(grid) grid.innerHTML=teacherCards(list);
+  const c=document.getElementById('f_count'); if(c) c.textContent=`共 ${list.length} 位教师`;
+}
+function clearFilter(){ ['f_subject','f_grade','f_region','f_online','f_edu','f_mode','f_pmin','f_pmax','f_cert','f_sort']
+  .forEach(id=>{const e=document.getElementById(id); if(e) e.value='';}); document.getElementById('f_sort').value='online'; applyFilter(); }
+function bindFind(){ applyFilter(); }
+
+function toggleFav(id){ let favs=LS.get(K.favorites,[]);
+  if(!curAccount()){ toast('请先登录后再收藏'); openLogin(false); return; }
+  if(favs.includes(id)) favs=favs.filter(x=>x!==id); else favs.push(id);
+  LS.set(K.favorites,favs); toast(favs.includes(id)?'已收藏':'已取消'); applyFilter(); }
+
+/* ---------------- 教师详情 ---------------- */
+function viewTeacher(id){
+  const t=LS.get(K.teachers,[]).find(x=>x.id===id);
+  if(!t) return `<div class="empty">未找到该教师</div>`;
+  const s=onlineState(t);
+  const favs=LS.get(K.favorites,[]);
+  return `<section class="section">
+    <button class="btn ghost sm" onclick="goto('#/find')">← 返回找老师</button>
+    <div class="card" style="margin-top:14px">
+      <div class="tc">
+        <div class="avatar">${esc(t.name[0])}</div>
+        <div style="flex:1">
+          <div class="name">${esc(t.name)} ${t.education?`<span class="muted small">· ${esc(t.education)}</span>`:''}</div>
+          <div class="sub"><span class="dot ${stateClass(s)}"></span>${stateLabel(s)} · ${esc(t.school||'')} · ⭐${t.rating} · ${esc(t.experience||'')}经验</div>
+        </div>
+        <div class="price">¥${t.price}/课时</div>
+      </div>
+      <p class="muted">${esc(t.bio||'')}</p>
+      <hr>
+      <h3 style="font-size:16px;margin:0 0 8px">分项认证</h3>
+      <div class="tags">${certTags(t.cert)}</div>
+      <hr>
+      <h3 style="font-size:16px;margin:0 0 8px">授课信息</h3>
+      <div class="row"><span class="muted small">科目：</span>${t.subjects.map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'—'}</div>
+      <div class="row" style="margin-top:6px"><span class="muted small">年级：</span>${t.grades.map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'—'}</div>
+      <div class="row" style="margin-top:6px"><span class="muted small">方式：</span>${MODES.find(m=>m[0]===t.mode)?MODES.find(m=>m[0]===t.mode)[1]:'—'} · 区域：${esc(t.region)}</div>
+      <hr>
+      <h3 style="font-size:16px;margin:0 0 8px">教育经历</h3>
+      ${(t.eduHistory||[]).map(e=>`<div class="kv"><span>${esc(e.school)}</span><span class="muted">${esc(e.degree||'')} ${esc(e.major||'')}</span></div>`).join('')||'<div class="muted">未填写</div>'}
+      <div class="row" style="margin-top:16px">
+        <button class="btn" onclick="toggleFav('${t.id}')">${favs.includes(t.id)?'★ 已收藏':'☆ 收藏'}</button>
+        <button class="btn ok" onclick="startInvite('${t.id}')">发起邀约</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ---------------- 在线答疑大厅 ---------------- */
+function viewQa(){
+  const me=myTeacher();
+  let ctrl='';
+  if(isRole('teacher')){
+    const p=me?me.presence:'offline';
+    ctrl=`<div class="card" style="margin-bottom:16px">
+      <h3 style="font-size:16px;margin:0 0 10px">我的在线状态</h3>
+      <div class="row">
+        <button class="btn ${p==='online'?'ok':''}" onclick="setPresence('online')">● 在线接单</button>
+        <button class="btn ${p==='busy'?'warn':''}" onclick="setPresence('busy')">● 忙碌</button>
+        <button class="btn ${p==='offline'?'bad':''}" onclick="setPresence('offline')">● 离线</button>
+      </div>
+      <p class="muted small" style="margin:10px 0 0">设置后系统每 25 秒心跳一次，超过 90 秒无心跳会自动转为离线（演示逻辑）。</p>
+    </div>`;
+  }
+  return `<section class="section">
+    <h2>💬 在线答疑大厅</h2>
+    ${ctrl}
+    <div class="grid" id="qaGrid"></div>
+  </section>`;
+}
+function bindQa(){
+  const online=LS.get(K.teachers,[]).filter(t=>t.status==='approved' && onlineState(t)!=='offline');
+  const grid=document.getElementById('qaGrid');
+  if(!online.length){ grid.innerHTML=`<div class="empty">当前没有在线教师，可切换为教师身份上线体验</div>`; return; }
+  grid.innerHTML=online.map(t=>{
+    const s=onlineState(t);
+    return `<div class="card">
+      <div class="tc">
+        <div class="avatar">${esc(t.name[0])}</div>
+        <div style="flex:1"><div class="name">${esc(t.name)}</div>
+          <div class="sub"><span class="dot ${stateClass(s)}"></span>${stateLabel(s)} · ${esc(t.subjects.join('/'))}</div></div>
+        <button class="btn sm" onclick="qaAsk('${t.id}')">提问</button>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="price">¥${t.price}/课时</span>
+        <button class="btn ghost sm" onclick="startInvite('${t.id}')">邀约辅导</button></div>
+    </div>`;
+  }).join('');
+}
+function setPresence(p){ const a=curAccount(); const t=myTeacher();
+  if(!a||!t){ toast('请先以教师身份注册并完善资料'); openLogin(true); return; }
+  if(t.status!=='approved'){ toast('教师资料需审核通过后才能上线'); return; }
+  t.presence=p; t.lastActive=now();
+  const all=LS.get(K.teachers,[]); const i=all.findIndex(x=>x.id===t.id); all[i]=t; LS.set(K.teachers,all);
+  toast('状态已更新为：'+stateLabel(p)); render(); }
+function qaAsk(id){ if(!curAccount()){ toast('请先登录'); openLogin(false); return; }
+  modal(`<h3>向教师提问（演示）</h3>
+    <div class="note blue">演示版：提问会存入你本机浏览器，教师端不会真实收到。真实产品由实时消息/IM 实现。</div>
+    <div class="field"><label>你的问题</label><textarea id="qa_txt" placeholder="例如：这道物理题的受力分析怎么做？"></textarea></div>
+    <button class="btn" style="width:100%" onclick="submitQa('${id}')">提交提问</button>`);
+}
+function submitQa(id){ const txt=document.getElementById('qa_txt').value.trim(); if(!txt){toast('请输入问题');return;}
+  const msgs=LS.get(K.messages,[]); msgs.push({id:uid('m'),from:curAccount().name,to:(LS.get(K.teachers,[]).find(t=>t.id===id)||{}).name||'教师',text:txt,role:'question',createdAt:now()});
+  LS.set(K.messages,msgs); closeModal(); toast('提问已提交（本地演示）'); }
+
+/* ---------------- 需求广场 ---------------- */
+function viewNeeds(){
+  return `<section class="section">
+    <div class="flex-between"><h2>📋 需求广场</h2>
+      <button class="btn" onclick="publishNeed()">+ 发布需求</button></div>
+    <div class="grid" id="needsGrid"></div>
+  </section>`;
+}
+function bindNeeds(){
+  const list=LS.get(K.needs,[]).filter(n=>n.status!=='down').sort((a,b)=>b.createdAt-a.createdAt);
+  const grid=document.getElementById('needsGrid');
+  if(!list.length){ grid.innerHTML=`<div class="empty">还没有需求，点击右上角发布第一个</div>`; return; }
+  grid.innerHTML=list.map(n=>`
+    <div class="card">
+      <div class="flex-between"><div class="name">${esc(n.by)}</div><span class="tag">${esc(n.status==='open'?'招募中':'已约')}</span></div>
+      <div class="tags" style="margin:8px 0"><span class="tag">${esc(n.subject)}</span><span class="tag">${esc(n.grade)}</span><span class="tag">${esc(n.region)}</span></div>
+      <p class="small">${esc(n.desc)}</p>
+      <div class="flex-between"><span class="price">预算 ¥${n.budget}/课时</span>
+        <button class="btn ghost sm" onclick="claimNeed('${n.id}')">我来接单</button></div>
+      <div class="muted small" style="margin-top:6px">发布于 ${fmtTime(n.createdAt)}</div>
+    </div>`).join('');
+}
+function publishNeed(){ if(!curAccount()){ toast('请先登录'); openLogin(false); return; }
+  modal(`<h3>发布辅导需求</h3>
+    <div class="field"><label>称呼</label><input id="nd_by" value="${esc(curAccount().name)}"></div>
+    <div class="field"><label>科目</label><select id="nd_subject">${COMMON_SUBJECTS.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>年级</label><select id="nd_grade">${GRADE_LEVELS.map(g=>`<option>${g}</option>`).join('')}</select></div>
+    <div class="field"><label>区域</label><select id="nd_region">${REGIONS.map(r=>`<option>${r}</option>`).join('')}</select></div>
+    <div class="field"><label>预算(元/课时)</label><input id="nd_budget" type="number" value="150"></div>
+    <div class="field"><label>详细描述</label><textarea id="nd_desc" placeholder="孩子的学习情况、期望时间等"></textarea></div>
+    <button class="btn" style="width:100%" onclick="submitNeed()">发布</button>`);
+}
+function submitNeed(){ const by=document.getElementById('nd_by').value.trim(); if(!by){toast('请填写称呼');return;}
+  const needs=LS.get(K.needs,[]);
+  needs.push({id:uid('n'),by,subject:document.getElementById('nd_subject').value,grade:document.getElementById('nd_grade').value,
+    region:document.getElementById('nd_region').value,budget:+document.getElementById('nd_budget').value||0,
+    desc:document.getElementById('nd_desc').value.trim(),status:'open',createdAt:now()});
+  LS.set(K.needs,needs); closeModal(); toast('需求已发布'); render(); }
+function claimNeed(id){ if(!curAccount()){ toast('请先登录'); openLogin(false); return; }
+  const needs=LS.get(K.needs,[]); const n=needs.find(x=>x.id===id); if(!n) return;
+  n.status='claimed'; n.claimedBy=curAccount().name; LS.set(K.needs,needs);
+  toast('已接单（演示：真实产品将通知家长并生成订单）'); render(); }
+
+/* ---------------- 邀约 / 接单 / 订单 ---------------- */
+function startInvite(teacherId){ if(!curAccount()){ toast('请先登录'); openLogin(false); return; }
+  const t=LS.get(K.teachers,[]).find(x=>x.id===teacherId);
+  modal(`<h3>向 ${esc(t.name)} 发起邀约</h3>
+    <div class="field"><label>科目</label><select id="iv_subject">${(t.subjects||[]).map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>年级</label><select id="iv_grade">${(t.grades||GRADE_LEVELS).map(g=>`<option>${g}</option>`).join('')}</select></div>
+    <div class="field"><label>区域</label><select id="iv_region">${REGIONS.map(r=>`<option ${r===t.region?'selected':''}>${r}</option>`).join('')}</select></div>
+    <div class="field"><label>期望课时数</label><input id="iv_hours" type="number" value="10"></div>
+    <div class="field"><label>留言</label><textarea id="iv_note" placeholder="希望提升的方向、时间安排等"></textarea></div>
+    <div class="note">平台接单服务费为订单金额的 8%（演示计算，真实产品接入支付后实际计费）。</div>
+    <button class="btn" style="width:100%" onclick="submitInvite('${teacherId}')">发送邀约</button>`);
+}
+function submitInvite(teacherId){ const t=LS.get(K.teachers,[]).find(x=>x.id===teacherId);
+  const hours=+document.getElementById('iv_hours').value||1;
+  const amount=t.price*hours; const fee=Math.round(amount*RATE);
+  const invs=LS.get(K.invitations,[]);
+  invs.push({id:uid('iv'),teacherId,teacherName:t.name,by:curAccount().name,
+    subject:document.getElementById('iv_subject').value,grade:document.getElementById('iv_grade').value,
+    region:document.getElementById('iv_region').value,hours,amount,fee,
+    note:document.getElementById('iv_note').value.trim(),status:'pending',createdAt:now()});
+  LS.set(K.invitations,invs); closeModal(); toast('邀约已发送（演示：教师端可接单）'); }
+
+/* ---------------- 学情报告（本地模板生成） ---------------- */
+function viewReport(){
+  return `<section class="section">
+    <h2>📈 学情报告</h2>
+    <div class="note">演示版：报告由内置模板根据本机输入实时生成，<b>并非真实 AI 推理</b>。真实产品将对接大模型生成并归档。</div>
+    <div class="card">
+      <div class="field"><label>学生姓名</label><input id="rp_name" placeholder="如：小明"></div>
+      <div class="field"><label>科目</label><select id="rp_subject">${COMMON_SUBJECTS.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>最近考试成绩(分)</label><input id="rp_score" type="number" placeholder="如：75"></div>
+      <div class="field"><label>薄弱知识点（逗号分隔）</label><input id="rp_weak" placeholder="如：函数,几何证明"></div>
+      <div class="field"><label>学习习惯备注</label><textarea id="rp_habit" placeholder="如：粗心、做题慢"></textarea></div>
+      <button class="btn" onclick="genReport()">生成学情报告</button>
+    </div>
+    <div id="rp_out" style="margin-top:16px"></div>
+    <h3 style="margin-top:20px">我的历史报告</h3>
+    <div id="rp_list" class="grid"></div>
+  </section>`;
+}
+function bindReport(){ renderReportList(); }
+function genReport(){ const name=document.getElementById('rp_name').value.trim()||'该生';
+  const subject=document.getElementById('rp_subject').value;
+  const score=+document.getElementById('rp_score').value||0;
+  const weak=(document.getElementById('rp_weak').value||'').split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  const habit=document.getElementById('rp_habit').value.trim();
+  let level = score>=90?'优秀':score>=75?'良好':score>=60?'中等':'待提升';
+  const analysis = weak.length? `该生在「${weak.join('、')}」方面存在明显薄弱，建议针对性专项训练。` : '暂未填写薄弱点，建议结合日常作业进一步诊断。';
+  const html=`<div class="card">
+    <h3 style="margin:0 0 10px">${esc(name)} 的${esc(subject)}学情报告</h3>
+    <div class="kv"><span>综合评级</span><span class="pill">${level}</span></div>
+    <div class="kv"><span>最近成绩</span><span>${score} 分</span></div>
+    <div class="kv"><span>薄弱知识点</span><span>${weak.length?weak.map(w=>`<span class="tag">${esc(w)}</span>`).join(''):'—'}</span></div>
+    <hr>
+    <p><b>薄弱分析：</b>${analysis}</p>
+    <p><b>学习习惯：</b>${habit?esc(habit):'未填写'}</p>
+    <p><b>提升建议：</b>① 巩固基础概念；② 每周 2 次专项练习；③ 建立错题本；④ 阶段性测评。</p>
+    <div class="muted small">生成时间：${fmtTime(now())}（演示模板生成）</div>
+    <button class="btn sm" onclick="saveReport()">保存到本机</button>
+  </div>`;
+  document.getElementById('rp_out').innerHTML=html;
+  window._lastReport={name,subject,score,weak,habit,level,analysis,createdAt:now()};
+}
+function saveReport(){ if(!window._lastReport){toast('请先生成报告');return;} if(!curAccount()){toast('请先登录');openLogin(false);return;}
+  const rs=LS.get(K.reports,[]); window._lastReport.accountId=curAccount().id; rs.push(window._lastReport);
+  LS.set(K.reports,rs); toast('报告已保存'); renderReportList(); }
+function renderReportList(){ const el=document.getElementById('rp_list'); if(!el) return;
+  let list=LS.get(K.reports,[]); if(curAccount()) list=list.filter(r=>r.accountId===curAccount().id);
+  if(!list.length){ el.innerHTML=`<div class="empty">暂无保存的报告</div>`; return; }
+  el.innerHTML=list.slice().reverse().slice(0,6).map(r=>`
+    <div class="card"><div class="name">${esc(r.name)} · ${esc(r.subject)}</div>
+      <div class="tags" style="margin:6px 0"><span class="pill">${esc(r.level)}</span><span class="tag">${r.score}分</span></div>
+      <p class="small">${esc(r.analysis)}</p><div class="muted small">${fmtTime(r.createdAt)}</div></div>`).join('');
+}
+
+/* ---------------- 消息 ---------------- */
+function viewMessages(){ return `<section class="section">
+  <h2>✉️ 消息中心</h2>
+  <div class="note blue">演示版：消息存于本机，支持在本机发送与查看，不跨用户实时同步（真实产品由 IM 服务实现）。</div>
+  <div class="card">
+    <div class="field"><label>发送给（教师名/系统）</label><input id="msg_to" placeholder="如：林同学 或 系统通知"></div>
+    <div class="field"><label>内容</label><textarea id="msg_text" placeholder="输入消息…"></textarea></div>
+    <button class="btn" onclick="sendMsg()">发送</button>
+  </div>
+  <div id="msg_list" style="margin-top:16px"></div>
+</section>`; }
+function bindMessages(){ renderMsgList(); }
+function sendMsg(){ const to=document.getElementById('msg_to').value.trim(); const text=document.getElementById('msg_text').value.trim();
+  if(!to||!text){toast('请填写收件人和内容');return;} if(!curAccount()){toast('请先登录');openLogin(false);return;}
+  const msgs=LS.get(K.messages,[]); msgs.push({id:uid('m'),from:curAccount().name,to,text,createdAt:now()});
+  LS.set(K.messages,msgs); document.getElementById('msg_text').value=''; toast('已发送（本机）'); renderMsgList(); }
+function renderMsgList(){ const el=document.getElementById('msg_list'); if(!el) return;
+  let list=LS.get(K.messages,[]); if(curAccount()) list=list.filter(m=>m.from===curAccount().name||m.to===curAccount().name);
+  list=list.sort((a,b)=>b.createdAt-a.createdAt);
+  if(!list.length){ el.innerHTML=`<div class="empty">暂无消息</div>`; return; }
+  el.innerHTML=list.map(m=>`<div class="card" style="margin-bottom:10px">
+    <div class="flex-between"><span class="small"><b>${esc(m.from)}</b> → <b>${esc(m.to)}</b></span>
+      <span class="muted small">${fmtTime(m.createdAt)}</span></div>
+    <p class="small" style="margin:6px 0 0">${esc(m.text)}</p></div>`).join('');
+}
+
+/* ---------------- 会员 ---------------- */
+function viewMember(){ const m=LS.get(K.membership,null);
+  const tiers=[{k:'basic',n:'基础会员',p:0,items:['浏览已认证教师','基础筛选','收藏教师']},
+    {k:'standard',n:'标准会员',p:29,items:['全部基础权益','优先展示需求','无限学情报告','消息不限']},
+    {k:'premium',n:'尊享会员',p:99,items:['全部标准权益','专属客服','教师接单优先匹配','会员标识']}];
+  return `<section class="section">
+    <h2>⭐ 会员订阅</h2>
+    <div class="note">演示版：点击开通仅在本机记录会员状态，<b>不会产生任何真实扣费</b>。真实产品接入支付后生效。</div>
+    ${m?`<div class="card" style="margin-bottom:16px"><div class="flex-between"><div class="name">当前会员：${esc(m.tierName)}</div>
+      <span class="pill">开通于 ${fmtTime(m.since)}</span></div></div>`:''}
+    <div class="grid">${tiers.map(t=>`
+      <div class="card">
+        <h3 style="margin:0 0 4px">${t.n}</h3>
+        <div class="price">¥${t.p}<span class="muted small">/月</span></div>
+        <ul class="small" style="padding-left:18px;margin:10px 0">${t.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+        <button class="btn ${m&&m.tier===t.k?'ghost':'ok'} sm" style="width:100%" onclick="subscribe('${t.k}','${t.n}',${t.p})">
+          ${m&&m.tier===t.k?'当前已开通':'开通'}</button>
+      </div>`).join('')}</div>
+  </section>`; }
+function bindMember(){}
+function subscribe(k,name,p){ if(!curAccount()){toast('请先登录');openLogin(false);return;}
+  LS.set(K.membership,{tier:k,tierName:name,price:p,since:now()}); toast('已开通'+name+'（演示不计费）'); render(); }
+
+/* ---------------- 个人中心 ---------------- */
+function viewMe(){ const a=curAccount(); if(!a){ openLogin(false); return ''; }
+  const t=myTeacher();
+  return `<section class="section">
+    <h2>👤 个人中心 · ${esc(a.name)}</h2>
+    <div class="grid">
+      <div class="card">
+        <h3 style="margin:0 0 8px">我的身份</h3>
+        <div class="tags">${a.roles.map(r=>`<span class="tag">${r==='student'?'学生':r==='parent'?'家长':r==='teacher'?'教师':r==='admin'?'管理员':r}</span>`).join('')}</div>
+        <hr>
+        <button class="btn ghost sm" onclick="openRoleAdd()">+ 开通其他身份</button>
+        ${t?`<button class="btn sm" onclick="goto('#/me')">教师资料已提交</button>`:''}
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">我的收藏</h3>
+        ${favList()}
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">我发出的邀约</h3>
+        ${invList()}
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">我的订单</h3>
+        ${orderList()}
+      </div>
+    </div>
+    ${t?`<div class="card" style="margin-top:16px"><h3 style="margin:0 0 8px">教师工作台</h3>
+      <div class="kv"><span>审核状态</span><span class="pill">${t.status==='approved'?'已上线':t.status==='pending'?'待审核':t.status==='rejected'?'已拒绝':'未知'}</span></div>
+      ${t.status==='rejected'?`<div class="note">拒绝原因：${esc(t.rejectReason||'未填写')}</div>`:''}
+      <div class="row" style="margin-top:10px">
+        <button class="btn sm" onclick="goto('#/qa')">去设置在线状态</button>
+        <button class="btn sm" onclick="editTeacher()">编辑资料</button>
+        <button class="btn sm" onclick="teacherInbox()">查看邀约(${LS.get(K.invitations,[]).filter(i=>i.teacherId===t.id&&i.status==='pending').length})</button>
+      </div></div>`:`<div class="card" style="margin-top:16px"><h3 style="margin:0 0 8px">成为教师</h3>
+      <p class="small">提交资料并通过平台审核后即可上线接单。</p>
+      <button class="btn" onclick="editTeacher()">填写教师资料</button></div>`}
+  </section>`;
+}
+function favList(){ const favs=LS.get(K.favorites,[]); const ts=LS.get(K.teachers,[]).filter(t=>favs.includes(t.id));
+  if(!ts.length) return `<div class="muted small">还没有收藏</div>`;
+  return ts.map(t=>`<div class="kv click" onclick="goto('#/teacher/${t.id}')"><span>${esc(t.name)}</span><span class="muted">¥${t.price}</span></div>`).join(''); }
+function invList(){ const a=curAccount(); const list=LS.get(K.invitations,[]).filter(i=>i.by===a.name);
+  if(!list.length) return `<div class="muted small">暂无邀约</div>`;
+  return list.slice().reverse().map(i=>`<div class="kv"><span>${esc(i.teacherName)} · ${esc(i.subject)}</span>
+    <span class="tag ${i.status==='pending'?'o':i.status==='accepted'?'g':'bad'}">${i.status==='pending'?'待接单':i.status==='accepted'?'已接单':'已拒绝'}</span></div>`).join(''); }
+function orderList(){ const a=curAccount(); let list=LS.get(K.orders,[]).filter(o=>o.by===a.name||(myTeacher()&&o.teacherId===myTeacher().id));
+  if(!list.length) return `<div class="muted small">暂无订单</div>`;
+  return list.slice().reverse().map(o=>`<div class="kv"><span>${esc(o.teacherName)} · ${esc(o.subject)}</span>
+    <span class="price">¥${o.amount}</span></div>`).join(''); }
+function bindMe(){}
+function openRoleAdd(){ const a=curAccount(); const all=['student','parent','teacher','admin'];
+  const rest=all.filter(r=>!a.roles.includes(r));
+  modal(`<h3>开通其他身份</h3><div class="field"><label>选择身份</label><select id="ra_role">${rest.map(r=>`<option value="${r}">${r==='student'?'学生':r==='parent'?'家长':r==='teacher'?'教师':'管理员(演示)'}</option>`).join('')}</select></div>
+    <button class="btn" style="width:100%" onclick="addRole()">开通</button>`);
+}
+function addRole(){ const r=document.getElementById('ra_role').value; const a=curAccount();
+  if(!a.roles.includes(r)) a.roles.push(r); LS.set(K.accounts,LS.get(K.accounts,[]).map(x=>x.id===a.id?a:x));
+  closeModal(); toast('身份已开通'); if(r==='teacher') editTeacher(); else render(); }
+
+/* 教师资料表单（分步） */
+function editTeacher(){ if(!curAccount()){openLogin(true);return;}
+  const t=myTeacher()||{name:curAccount().name,subjects:[],grades:[],cert:{}};
+  modal(`<h3>教师资料（分步）</h3>
+    <div class="stepper"><div class="st active">基本信息</div><div class="st">认证</div><div class="st">提交</div></div>
+    <div class="field"><label>对外展示名</label><input id="tf_name" value="${esc(t.name||'')}"></div>
+    <div class="field"><label>学校</label><input id="tf_school" value="${esc(t.school||'')}" placeholder="如：北京师范大学"></div>
+    <div class="field"><label>学历</label><select id="tf_edu">${EDUCATIONS.map(e=>`<option ${t.education===e?'selected':''}>${e}</option>`).join('')}</select></div>
+    <div class="field"><label>擅长科目(逗号分隔)</label><input id="tf_subjects" value="${(t.subjects||[]).join('、')}"></div>
+    <div class="field"><label>适教年级(逗号分隔)</label><input id="tf_grades" value="${(t.grades||[]).join('、')}"></div>
+    <div class="field"><label>区域</label><select id="tf_region">${REGIONS.map(r=>`<option ${t.region===r?'selected':''}>${r}</option>`).join('')}</select></div>
+    <div class="field"><label>课时费(元)</label><input id="tf_price" type="number" value="${t.price||120}"></div>
+    <div class="field"><label>授课方式</label><select id="tf_mode">${MODES.map(([v,l])=>`<option value="${v}" ${t.mode===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="field"><label>简介</label><textarea id="tf_bio" placeholder="教学经验与风格">${esc(t.bio||'')}</textarea></div>
+    <hr>
+    <h3 style="font-size:15px;margin:0 0 8px">分项认证（勾选表示已提交材料，将由平台审核）</h3>
+    <div class="row">${['cell','realName','studentStatus','education','platform'].map((k,i)=>{
+      const labels=['手机认证','实名认证','学籍认证','学历认证','平台资格'];
+      return `<label class="tag" style="cursor:pointer"><input type="checkbox" id="tf_cert_${k}" ${t.cert&&t.cert[k]?'checked':''}> ${labels[i]}</label>`;}).join('')}</div>
+    <div class="note">提交后状态为「待审核」，管理员在「管理后台」审核通过后，你才会出现在「找老师」列表中。</div>
+    <button class="btn" style="width:100%" onclick="saveTeacher()">${myTeacher()?'保存修改':'提交并送审'}</button>`);
+}
+function saveTeacher(){ const a=curAccount(); const all=LS.get(K.teachers,[]);
+  const data={ name:document.getElementById('tf_name').value.trim()||a.name,
+    school:document.getElementById('tf_school').value.trim(), education:document.getElementById('tf_edu').value,
+    subjects:(document.getElementById('tf_subjects').value||'').split(/[、,，]/).map(s=>s.trim()).filter(Boolean),
+    grades:(document.getElementById('tf_grades').value||'').split(/[、,，]/).map(s=>s.trim()).filter(Boolean),
+    region:document.getElementById('tf_region').value, price:+document.getElementById('tf_price').value||0,
+    mode:document.getElementById('tf_mode').value, bio:document.getElementById('tf_bio').value.trim(),
+    cert:{cell:document.getElementById('tf_cert_cell').checked,realName:document.getElementById('tf_cert_realName').checked,
+      studentStatus:document.getElementById('tf_cert_studentStatus').checked,education:document.getElementById('tf_cert_education').checked,
+      platform:document.getElementById('tf_cert_platform').checked} };
+  let t=myTeacher();
+  if(t){ Object.assign(t,data); const i=all.findIndex(x=>x.id===t.id); all[i]=t; }
+  else { t=Object.assign({id:uid('t'),accountId:a.id,rating:4.5,experience:'新入驻',eduHistory:[],presence:'offline',status:'pending',createdAt:now()},data); all.push(t); }
+  LS.set(K.teachers,all); closeModal();
+  toast(t.status==='pending'?'已提交，等待审核':'已保存'); render(); }
+function teacherInbox(){ const t=myTeacher(); if(!t) return;
+  const invs=LS.get(K.invitations,[]).filter(i=>i.teacherId===t.id);
+  if(!invs.length){ modal(`<h3>邀约收件箱</h3><div class="empty">暂无邀约</div><button class="btn" style="width:100%" onclick="closeModal()">关闭</button>`); return; }
+  modal(`<h3>邀约收件箱</h3>${invs.slice().reverse().map(i=>`
+    <div class="card" style="margin-bottom:10px">
+      <div class="kv"><span>${esc(i.by)} 邀约</span><span class="tag ${i.status==='pending'?'o':i.status==='accepted'?'g':'bad'}">${i.status==='pending'?'待处理':i.status==='accepted'?'已接单':'已拒绝'}</span></div>
+      <p class="small">${esc(i.subject)} · ${esc(i.grade)} · ${esc(i.region)} · ${i.hours}课时 · 合计¥${i.amount}（平台费¥${i.fee}）</p>
+      <p class="small muted">留言：${esc(i.note||'无')}</p>
+      ${i.status==='pending'?`<div class="row"><button class="btn ok sm" onclick="acceptInvite('${i.id}')">接单</button>
+        <button class="btn bad sm" onclick="rejectInvite('${i.id}')">拒绝</button></div>`:''}
+    </div>`).join('')}`);
+}
+function acceptInvite(id){ const invs=LS.get(K.invitations,[]); const i=invs.find(x=>x.id===id); if(!i) return;
+  i.status='accepted'; LS.set(K.invitations,invs);
+  const orders=LS.get(K.orders,[]); orders.push({id:uid('o'),teacherId:i.teacherId,teacherName:i.teacherName,by:i.by,
+    subject:i.subject,grade:i.grade,region:i.region,hours:i.hours,amount:i.amount,fee:i.fee,status:'active',createdAt:now()});
+  LS.set(K.orders,orders); closeModal(); toast('已接单，订单已生成（演示）'); render(); }
+function rejectInvite(id){ const invs=LS.get(K.invitations,[]); const i=invs.find(x=>x.id===id); if(!i) return;
+  i.status='rejected'; LS.set(K.invitations,invs); closeModal(); toast('已拒绝'); }
+
+/* ---------------- 管理后台 ---------------- */
+function viewAdmin(){ if(!isRole('admin')){ return `<div class="empty">需要管理员身份<br><button class="btn" onclick="openLogin(true)">注册/登录管理员</button>
+  <p class="small muted">演示：注册时选择「管理员」身份即可进入（真实产品仅平台方持有）。</p></div>`; }
+  const pending=LS.get(K.teachers,[]).filter(t=>t.status==='pending');
+  const orders=LS.get(K.orders,[]); const members=LS.get(K.membership,null);
+  const stats=[['教师总数',LS.get(K.teachers,[]).length],['已上线',LS.get(K.teachers,[]).filter(t=>t.status==='approved').length],
+    ['待审核',pending.length],['需求数',LS.get(K.needs,[]).length],['订单数',orders.length],['会员',members?'1':'0']];
+  return `<section class="section">
+    <h2>🛠️ 管理后台</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">
+      ${stats.map(s=>`<div class="card center"><div class="price" style="font-size:22px">${s[1]}</div><div class="muted small">${s[0]}</div></div>`).join('')}
+    </div>
+    <h3 style="margin:20px 0 10px">教师审核队列（${pending.length}）</h3>
+    <div id="adminPending">${adminPendingHtml(pending)}</div>
+    <h3 style="margin:20px 0 10px">需求管理</h3>
+    <div class="grid">${LS.get(K.needs,[]).map(n=>`<div class="card"><div class="flex-between"><span class="name">${esc(n.by)}</span>
+      <span class="tag">${esc(n.status)}</span></div><p class="small">${esc(n.subject)}·${esc(n.grade)}·${esc(n.region)}</p>
+      <button class="btn ghost sm" onclick="takeDownNeed('${n.id}')">下架</button></div>`).join('')}</div>
+  </section>`;
+}
+function adminPendingHtml(list){ if(!list.length) return `<div class="empty">暂无待审核教师 🎉</div>`;
+  return list.map(t=>`<div class="card" style="margin-bottom:10px">
+    <div class="tc"><div class="avatar">${esc(t.name[0])}</div>
+      <div style="flex:1"><div class="name">${esc(t.name)}</div>
+        <div class="sub">${esc(t.school||'')} · ${esc(t.education||'')} · ¥${t.price} · ${esc(t.region)}</div></div></div>
+    <div class="tags">${(t.subjects||[]).map(s=>`<span class="tag">${esc(s)}</span>`).join('')}</div>
+    <div class="tags" style="margin-top:6px">${certTags(t.cert)}</div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ok sm" onclick="approveTeacher('${t.id}')">通过并上线</button>
+      <button class="btn bad sm" onclick="rejectTeacher('${t.id}')">拒绝</button>
+    </div></div>`).join('');
+}
+function bindAdmin(){}
+function approveTeacher(id){ const all=LS.get(K.teachers,[]); const t=all.find(x=>x.id===id); if(!t) return;
+  t.status='approved'; t.presence='offline'; LS.set(K.teachers,all); toast('已通过，教师已上线'); render(); }
+function rejectTeacher(id){ modal(`<h3>拒绝原因</h3><div class="field"><textarea id="rj_reason" placeholder="如：学历材料不清晰"></textarea></div>
+  <button class="btn bad" style="width:100%" onclick="doReject('${id}')">确认拒绝</button>`); }
+function doReject(id){ const reason=document.getElementById('rj_reason').value.trim(); const all=LS.get(K.teachers,[]);
+  const t=all.find(x=>x.id===id); if(!t) return; t.status='rejected'; t.rejectReason=reason; LS.set(K.teachers,all);
+  closeModal(); toast('已拒绝'); render(); }
+function takeDownNeed(id){ const needs=LS.get(K.needs,[]); const n=needs.find(x=>x.id===id); if(!n) return;
+  n.status='down'; LS.set(K.needs,needs); toast('需求已下架'); render(); }
+
+/* ---------------- 登录 / 注册 ---------------- */
+function openLogin(reg){ const a=curAccount();
+  if(a){ toast('当前已登录：'+a.name); return; }
+  modal(`<h3>${reg?'注册新账号':'登录知行家教'}</h3>
+    <div class="role-pick" id="rp">
+      <button data-r="student" class="${reg?'':'sel'}" onclick="pickRole('student')">学生</button>
+      <button data-r="parent" onclick="pickRole('parent')">家长</button>
+      <button data-r="teacher" onclick="pickRole('teacher')">教师</button>
+      <button data-r="admin" onclick="pickRole('admin')">管理员</button>
+    </div>
+    <div class="field"><label>手机号 / 邮箱</label><input id="li_user" placeholder="演示可随意填写"></div>
+    <div class="field"><label>密码</label><input id="li_pwd" type="password" placeholder="演示可随意填写"></div>
+    <button class="btn" style="width:100%" onclick="${reg?'doRegister()':'doLogin()'}">${reg?'注册并进入':'登录'}</button>
+    <p class="small muted center" style="margin-top:12px">演示版：无需真实账号，填写即可进入对应身份工作台。<br>真实平台会写入数据库、校验密码并推送匹配。</p>`);
+  window._role = reg?'student':'student';
+}
+function pickRole(r){ window._role=r; document.querySelectorAll('#rp button').forEach(b=>b.classList.toggle('sel',b.getAttribute('data-r')===r)); }
+function doLogin(){ const u=document.getElementById('li_user').value.trim(); const p=document.getElementById('li_pwd').value;
+  if(!u){toast('请输入账号');return;} const acc=LS.get(K.accounts,[]).find(a=>a.phone===u);
+  if(!acc){ toast('账号不存在，请先注册'); return; }
+  if(acc.pwd!==p){ toast('密码错误（演示）'); return; }
+  session=acc.id; LS.set(K.session,session); closeModal(); toast('登录成功'); render(); }
+function doRegister(){ const u=document.getElementById('li_user').value.trim(); const p=document.getElementById('li_pwd').value;
+  const r=window._role||'student';
+  if(!u){toast('请输入手机号/邮箱');return;} if(!p){toast('请设置密码');return;}
+  const accs=LS.get(K.accounts,[]);
+  if(accs.find(a=>a.phone===u)){ toast('该账号已注册，请登录'); return; }
+  const acc={id:uid('a'),phone:u,pwd:p,name:(u.includes('@')?u.split('@')[0]:u.slice(0,4)),roles:[r],createdAt:now()};
+  accs.push(acc); LS.set(K.accounts,accs); session=acc.id; LS.set(K.session,session);
+  closeModal(); toast('注册成功，已登录'); render();
+  if(r==='teacher') setTimeout(()=>editTeacher(),300); }
+
+function doLogout(){ session=null; LS.set(K.session,null); toast('已退出'); render(); }
+function goto(h){ location.hash=h; }
+
+/* 初次渲染兜底 */
+if(document.readyState!=='loading') render();
+</script>
+</body>
+</html>
